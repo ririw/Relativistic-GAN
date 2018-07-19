@@ -1,5 +1,5 @@
 import torch
-from relgan.utils import Flatten, Reshape
+from relgan.utils import Flatten, Reshape, Squeeze
 
 
 def Classifier():
@@ -26,16 +26,20 @@ class Generator(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.generator = torch.nn.Sequential(
-            torch.nn.Linear(32, 64),
-            torch.nn.PReLU(),
             torch.nn.Linear(64, 128),
             torch.nn.PReLU(),
             torch.nn.Linear(128, 256),
             torch.nn.PReLU(),
-            torch.nn.Linear(256, 28**2),
-            Reshape(28, 28),
+            Reshape(4, 8, 8),
+            torch.nn.ConvTranspose2d(4, 32, 7),
+            torch.nn.PReLU(),
+            torch.nn.Upsample(scale_factor=2),
+            torch.nn.ConvTranspose2d(32, 64, 5),
+            torch.nn.PReLU(),
+            torch.nn.Conv2d(64, 1, 5),
+            Squeeze()
         )
 
     def forward(self, n):
-        vec = torch.randn(n, 32)
+        vec = torch.randn(n, 64)
         return self.generator(vec)

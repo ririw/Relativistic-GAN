@@ -3,7 +3,7 @@ import torch
 
 class Flatten(torch.nn.Module):
     def forward(self, x):
-        return x.view(x.shape[0], -1)
+        return x.contiguous().view(x.shape[0], -1)
 
 
 class Reshape(torch.nn.Module):
@@ -12,7 +12,11 @@ class Reshape(torch.nn.Module):
         self.shape = [-1] + list(shape)
 
     def forward(self, x):
-        res = x.view(*self.shape)
+        res = x.contiguous().view(*self.shape)
         msg = 'Incorrect shape size:\n\tinpt: {}\n\toutput: {}'.format(res.shape, x.shape)
         assert res.shape[0] == x.shape[0], msg
         return res
+
+class Squeeze(torch.nn.Module):
+    def forward(self, x):
+        return x.squeeze()

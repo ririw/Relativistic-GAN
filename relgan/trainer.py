@@ -3,6 +3,7 @@ Relgan training harness.
 """
 import torch
 
+batch_size = 31
 
 class RelGAN:
     def __init__(self, generator, critic, data):
@@ -19,13 +20,13 @@ class RelGAN:
         self.g_step()
 
     def d_step(self):
-        batch = torch.randperm(self.data.shape[0])[:32]
+        batch = torch.randperm(self.data.shape[0])[:batch_size]
         self.critic_opt.zero_grad()
 
         real_img = self.data[batch]
-        gene_img = self.generator(32).detach()
+        gene_img = self.generator(batch_size).detach()
 
-        y = torch.ones(32)
+        y = torch.ones(batch_size)
         y_real = self.critic(real_img).view(-1)
         y_gene = self.critic(gene_img).view(-1)
 
@@ -35,17 +36,17 @@ class RelGAN:
         self.critic_opt.step()
 
     def g_step(self):
-        batch = torch.randperm(self.data.shape[0])[:32]
+        batch = torch.randperm(self.data.shape[0])[:batch_size]
         self.generator_opt.zero_grad()
 
         real_img = self.data[batch]
-        gene_img = self.generator(32)
+        gene_img = self.generator(batch_size)
 
         y_real = self.critic(real_img).view(-1)
         y_gene = self.critic(gene_img).view(-1)
-        y = torch.ones(32)
+        y = torch.ones(batch_size)
 
         loss = torch.nn.BCEWithLogitsLoss()
-        err_g = loss(y_real - y_gene, y)
+        err_g = loss(y_gene - y_real, y)
         err_g.backward()
         self.generator_opt.step()
