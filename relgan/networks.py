@@ -28,6 +28,7 @@ class Generator(torch.nn.Module):
             torch.nn.PReLU(),
             torch.nn.BatchNorm1d(1024),
             torch.nn.Linear(1024, 28**2),
+            torch.nn.Sigmoid(),
             Reshape(28, 28),
         )
 

@@ -3,7 +3,10 @@ Relgan training harness.
 """
 import torch
 
+from relgan import experiment
+
 batch_size = 31
+
 
 class RelGAN:
     def __init__(self, generator, critic, data):
@@ -30,10 +33,13 @@ class RelGAN:
         y_real = self.critic(real_img).view(-1)
         y_gene = self.critic(gene_img).view(-1)
 
-        loss = torch.nn.BCEWithLogitsLoss()
-        err_d = loss(y_real - y_gene, y)
+        err_d = (
+                torch.mean((y_real - torch.mean(y_gene) - 1) ** 2) +
+                torch.mean((y_gene - torch.mean(y_real) + 1) ** 2)
+        )
         err_d.backward()
         self.critic_opt.step()
+        experiment.ex.log_scalar('d.loss', err_d.item())
 
     def g_step(self):
         batch = torch.randperm(self.data.shape[0])[:batch_size]
@@ -44,9 +50,11 @@ class RelGAN:
 
         y_real = self.critic(real_img).view(-1)
         y_gene = self.critic(gene_img).view(-1)
-        y = torch.ones(batch_size)
 
-        loss = torch.nn.BCEWithLogitsLoss()
-        err_g = loss(y_gene - y_real, y)
+        err_g = (
+                torch.mean((y_real - torch.mean(y_gene) + 1) ** 2) +
+                torch.mean((y_gene - torch.mean(y_real) - 1) ** 2)
+        )
         err_g.backward()
         self.generator_opt.step()
+        experiment.ex.log_scalar('g.loss', err_g.item())
