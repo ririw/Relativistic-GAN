@@ -5,14 +5,18 @@ from relgan.utils import Flatten, Reshape
 
 def Classifier():
     return torch.nn.Sequential(
+        Reshape(1, 28, 28),
+        torch.nn.Conv2d(1, 32, 3),
+        torch.nn.MaxPool2d(2),
+        torch.nn.BatchNorm2d(32),
+        torch.nn.Conv2d(32, 64, 5),
+        torch.nn.BatchNorm2d(64),
         Flatten(),
-        torch.nn.Linear(28**2, 256),
+        torch.nn.Linear(5184, 512),
         torch.nn.PReLU(),
-        torch.nn.Linear(256, 256),
+        torch.nn.Linear(512, 128),
         torch.nn.PReLU(),
-        torch.nn.Linear(256, 256),
-        torch.nn.PReLU(),
-        torch.nn.Linear(256, 1),
+        torch.nn.Linear(128, 1),
     )
 
 
