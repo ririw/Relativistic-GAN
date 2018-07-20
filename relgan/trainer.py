@@ -9,11 +9,12 @@ batch_size = 31
 
 
 class RelGAN:
-    def __init__(self, generator, critic, data):
+    def __init__(self, generator, critic, data, device):
         super().__init__()
+        self.device = device
         self.data = data
-        self.critic: torch.nn.Module = critic
-        self.generator: torch.nn.Module = generator
+        self.critic: torch.nn.Module = critic.to(device)
+        self.generator: torch.nn.Module = generator.to(device)
 
         self.critic_opt = torch.optim.Adam(self.critic.parameters())
         self.generator_opt = torch.optim.Adam(self.generator.parameters())
@@ -26,10 +27,9 @@ class RelGAN:
         batch = torch.randperm(self.data.shape[0])[:batch_size]
         self.critic_opt.zero_grad()
 
-        real_img = self.data[batch]
+        real_img = self.data[batch].to(self.device)
         gene_img = self.generator(batch_size).detach()
 
-        y = torch.ones(batch_size)
         y_real = self.critic(real_img).view(-1)
         y_gene = self.critic(gene_img).view(-1)
 
@@ -45,7 +45,7 @@ class RelGAN:
         batch = torch.randperm(self.data.shape[0])[:batch_size]
         self.generator_opt.zero_grad()
 
-        real_img = self.data[batch]
+        real_img = self.data[batch].to(self.device)
         gene_img = self.generator(batch_size)
 
         y_real = self.critic(real_img).view(-1)

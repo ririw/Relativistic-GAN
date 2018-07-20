@@ -38,5 +38,6 @@ class Generator(torch.nn.Module):
         )
 
     def forward(self, n):
-        vec = torch.randn(n, 64)
+        device = next(self.generator.parameters()).device
+        vec = torch.randn(n, 64).to(device)
         return self.generator(vec)

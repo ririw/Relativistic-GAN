@@ -17,6 +17,7 @@ class Reshape(torch.nn.Module):
         assert res.shape[0] == x.shape[0], msg
         return res
 
+
 class Squeeze(torch.nn.Module):
     def forward(self, x):
         return x.squeeze()
